@@ -11,8 +11,6 @@ namespace Catalog.API.Products.GetProductByCategory
     {
         public async Task<GetProductsByCategoryResult> Handle(GetProductsByCategoryQuery query, CancellationToken cancellationToken)
         {
-            logger.LogInformation("GetProductsByCategoryQueryHandler.Handle called with {@Query}", query);
-
             var products = await session.Query<Product>()
                 .Where(x => x.Category.Contains(query.Category))
                 .ToListAsync();
