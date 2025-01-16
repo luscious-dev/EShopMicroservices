@@ -1,5 +1,6 @@
 ﻿using Discount.Grpc.Data;
 using Discount.Grpc.Models;
+using Google.Protobuf.Collections;
 using Grpc.Core;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
@@ -42,14 +43,43 @@ namespace Discount.Grpc.Services
             return coupon.Adapt<CouponModel>();
         }
 
-        public override Task<CouponModel> UpdateDiscount(UpdateDiscountRequest request, ServerCallContext context)
+        public override async Task<CouponModel> UpdateDiscount(UpdateDiscountRequest request, ServerCallContext context)
         {
-            return base.UpdateDiscount(request, context);
+            if (request.Coupon is null)
+                throw new RpcException(new Status(StatusCode.InvalidArgument, "Invalid request params"));
+
+            // Check for existing discount
+            var coupon = request.Coupon.Adapt<Coupon>();
+            dbContext.Coupons.Update(coupon);
+
+            await dbContext.SaveChangesAsync();
+
+            return coupon.Adapt<CouponModel>();
         }
 
-        public override Task<DeleteDiscountResponse> DeleteDiscount(DeleteDiscountRequest request, ServerCallContext context)
+        public override async Task<DeleteDiscountResponse> DeleteDiscount(DeleteDiscountRequest request, ServerCallContext context)
         {
-            return base.DeleteDiscount(request, context);
+            var coupon = await dbContext.Coupons
+                .FirstOrDefaultAsync(x => x.ProductName == request.ProductName);
+
+            if (coupon is not null)
+                dbContext.Coupons.Remove(coupon);
+            await dbContext.SaveChangesAsync();
+            return new DeleteDiscountResponse { Success = true };
+        }
+
+        public override async Task<CouponsModel> GetAllDiscounts(GetAllDiscountsRequest request, ServerCallContext context)
+        {
+            var discounts = await dbContext.Coupons.ToArrayAsync();
+
+            var res = new CouponsModel();
+            
+            foreach (var discount in discounts)
+            {
+                res.Coupons.Add(discount.Adapt<CouponModel>());
+            }
+
+            return res;
         }
     }
 }
