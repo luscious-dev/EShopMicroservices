@@ -1,6 +1,7 @@
 using Basket.API.Data;
 using BuildingBlocks.Behaviours;
 using BuildingBlocks.Exceptions.Handlers;
+using BuildingBlocks.Messaging.MassTransit;
 using Discount.Grpc;
 using HealthChecks.UI.Client;
 using Microsoft.Extensions.Caching.Distributed;
@@ -17,7 +18,7 @@ builder.Services.AddMediatR(config =>
     config.AddOpenBehavior(typeof(ValidationBehaviour<,>));
     config.AddOpenBehavior(typeof(LoggingBehaviour<,>));
 });
-
+builder.Services.AddMessageBroker(builder.Configuration);
 
 //builder.Services.AddScoped<IBasketRepository>(provider =>
 //{
