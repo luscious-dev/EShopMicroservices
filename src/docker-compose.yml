@@ -8,6 +8,9 @@ services:
   orderdb:
     image: mcr.microsoft.com/mssql/server:2022-latest
 
+  messagebroker:
+    image: rabbitmq:management
+
   distributedCache:
     image: redis
     
