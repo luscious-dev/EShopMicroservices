@@ -32,9 +32,16 @@ services:
       context: .
       dockerfile: Services/Discount/Discount.Grpc/Dockerfile
 
+  yarpapigateway:
+    image: ${DOCKER_REGISTRY-}yarpapigateway
+    build:
+      context: .
+      dockerfile: ApiGateways/YarpApiGateway/Dockerfile
+
 volumes:
   catalog_volume:
   basket_volume:
+
 
 
 
